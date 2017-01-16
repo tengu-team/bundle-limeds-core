@@ -1,16 +1,19 @@
 series: xenial
-applications:
+services:
   limeds:
-    charm: "cs:~tengu-team/limeds"
+    charm: "cs:~tengu-team/limeds-0"
     num_units: 1
+    annotations:
+      "gui-x": 400
+      "gui-y": 300
     to:
       - "0"
   docker:
-    charm: "cs:~tengu-team/docker"
+    charm: "cs:~tengu-team/docker-2"
     num_units: 1
     annotations:
-      "gui-x": 683
-      "gui-y": 308
+      "gui-x": 700
+      "gui-y": 300
     to:
       - "0"
 relations:
