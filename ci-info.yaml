@@ -1,0 +1,14 @@
+bundle:
+  name: limeds-core
+  namespace: tengu-team
+  release: true
+  to-channel: beta
+charm-upgrade:
+  limeds:
+    from-channel: edge
+    release: true
+    to-channel: beta
+  docker:
+    from-channel: edge
+    release: true
+    to-channel: beta
