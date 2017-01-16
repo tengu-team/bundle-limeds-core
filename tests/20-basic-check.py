@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=c0111,c0103
+# pylint: disable=c0111,c0103
 import re
 import unittest
 
@@ -8,16 +8,15 @@ import amulet
 
 SECONDS_TO_WAIT = 300
 
+
 class TestBundle(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.deployment = amulet.Deployment()
+        cls.deployment = amulet.Deployment(series='xenial')
 
-        # Editors Note:  Instead of declaring the bundle in the amulet
-        # setup stanza, rely on bundletester to deploy the bundle on
-        # this tests behalf.  When coupled with reset:false in
-        # tests.yaml this yields faster test runs per bundle.
+        cls.deployment.add('docker')
+        cls.deployment.add('limeds')
 
         # Allow some time for Juju to provision and deploy the bundle.
         cls.deployment.setup(timeout=SECONDS_TO_WAIT)
@@ -73,9 +72,6 @@ class TestBundle(unittest.TestCase):
             self.docker[0].info['public-address'],
             self.docker[0].info['open-ports'][0].split('/')[0])
         return base_url + path
-
-
-
 
 
 if __name__ == '__main__':
