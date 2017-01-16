@@ -1,0 +1,22 @@
+series: xenial
+applications:
+  limeds:
+    charm: "cs:~tengu-team/limeds"
+    num_units: 1
+    to:
+      - "0"
+  docker:
+    charm: "cs:~tengu-team/docker"
+    num_units: 1
+    annotations:
+      "gui-x": 683
+      "gui-y": 308
+    to:
+      - "0"
+relations:
+  - - "limeds:dockerhost"
+    - "docker:dockerhost"
+machines:
+  "0":
+    series: xenial
+    constraints: "arch=amd64 cpu-cores=1 cpu-power=100 mem=1740 root-disk=8192"
