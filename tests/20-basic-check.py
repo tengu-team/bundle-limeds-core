@@ -1,26 +1,38 @@
 #!/usr/bin/env python3
 # pylint: disable=c0111,c0103
+import os
 import re
 import unittest
 
+import yaml
 import requests
-import amulet
+from amulet import Deployment
 
 SECONDS_TO_WAIT = 300
 
 
+def find_bundle(name='bundle.yaml'):
+    '''Locate the bundle to load for this test.'''
+    # Check the environment variables for BUNDLE.
+    bundle_path = os.getenv('BUNDLE_PATH')
+    if not bundle_path:
+        # Construct bundle path from the location of this file.
+        bundle_path = os.path.join(os.path.dirname(__file__), '..', name)
+    return bundle_path
+
+
 class TestBundle(unittest.TestCase):
+    bundle_file = find_bundle()
 
     @classmethod
     def setUpClass(cls):
-        cls.deployment = amulet.Deployment(series='xenial')
-
-        cls.deployment.add('docker')
-        cls.deployment.add('limeds')
-
+        cls.deployment = Deployment(series='xenial')
+        with open(cls.bundle_file) as stream:
+            bundle_yaml = stream.read()
+        bundle = yaml.safe_load(bundle_yaml)
+        cls.deployment.load(bundle)
         # Allow some time for Juju to provision and deploy the bundle.
         cls.deployment.setup(timeout=SECONDS_TO_WAIT)
-
         # Wait for the system to settle down.
         application_messages = {
             'docker': re.compile('Ready'),
@@ -28,22 +40,11 @@ class TestBundle(unittest.TestCase):
         }
         cls.deployment.sentry.wait_for_messages(application_messages,
                                                 timeout=600)
-        # Make every unit available through self reference
-        # eg: for worker in self.workers:
-        #         print(worker.info['public-address'])
-        # cls.docker = cls.deployment.sentry['docker'][0]
-        # cls.limeds = cls.deployment.sentry['limeds'][0]
         cls.docker = cls.deployment.sentry['docker']
         cls.limeds = cls.deployment.sentry['limeds']
-        print("docker: {}".format(cls.docker))
-        for unit in cls.docker:
-            print(unit.info['public-address'])
-        print("limeds: {}".format(cls.limeds))
-        for unit in cls.limeds:
-            print(unit.info['public-address'])
-        exit()
 
     def test_editor(self):
+        self.deployment.expose('docker')
         url = self.get_url("/editor")
         teststring = "LimeDS Editor"
         response = requests.get(url)
@@ -56,6 +57,7 @@ class TestBundle(unittest.TestCase):
             )
 
     def test_API(self):
+        self.deployment.expose('docker')
         url = self.get_url("/_limeds/config")
         teststring = "limeds"
         response = requests.get(url)
@@ -68,7 +70,7 @@ class TestBundle(unittest.TestCase):
 
     def get_url(self, path):
         """ Return complete url including port to path"""
-        base_url = "{}:{}".format(
+        base_url = "http://{}:{}".format(
             self.docker[0].info['public-address'],
             self.docker[0].info['open-ports'][0].split('/')[0])
         return base_url + path
