@@ -1,7 +1,7 @@
 series: xenial
 services:
   limeds:
-    charm: "cs:~tengu-team/limeds-1"
+    charm: "cs:~tengu-team/limeds-2"
     num_units: 1
     annotations:
       "gui-x": 400
@@ -22,4 +22,3 @@ relations:
 machines:
   "0":
     series: xenial
-    constraints: "arch=amd64 cpu-cores=1 cpu-power=100 mem=1740 root-disk=8192"

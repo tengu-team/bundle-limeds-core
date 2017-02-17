@@ -35,8 +35,8 @@ class TestBundle(unittest.TestCase):
         cls.deployment.setup(timeout=SECONDS_TO_WAIT)
         # Wait for the system to settle down.
         application_messages = {
-            'docker': re.compile('Ready'),
-            'limeds': re.compile('Ready'),
+            'docker': re.compile(r'Ready'),
+            'limeds': re.compile(r'Ready'),
         }
         cls.deployment.sentry.wait_for_messages(application_messages,
                                                 timeout=600)
